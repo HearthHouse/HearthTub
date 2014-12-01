@@ -1,19 +1,185 @@
 ---
 layout: default
-title: Your New Jekyll Site
+title: HearthTub
 ---
 
-  <dl class='dl-horizontal'>
-    <dt>Temperature<dt><dd id='temp'>??</dd>
-    <dt>Set point<dt><dd id='set'>??</dd>
-  </dl>
+<div class="header">
+  <h1 id="title">
+    HearthTub
+  </h1>
+  <!--<a class="extra" href="/">home</a> -->
+</div>
+
+<p id='error' class='error'>
+  Waiting for <a href='http://172.168.1.75'>hottube</a>...
+  Are you on Hearth WiFi?
+</p>
+
+<div id='hottub' class='hide'>
+
+<div class='row'>
+  <div class='col-sm-6'>
+    <div id='controls'>
+      <div class='panel'>
+        <h1 id='temp'>
+          <div><span class='f'></span> °F</div>
+          <small><span class='c'></span> °C</small>
+        </h1>
+      </div>
+      <div class='panel'>
+        <h1 id='set'>
+          <span class='pull-left btn-group-vertical'>
+            <button class='btn btn-default' id='plus-set'>
+              <span class="glyphicon glyphicon-plus"></span>
+            </button>
+            <button class='btn btn-default' id='minus-set'>
+              <span class="glyphicon glyphicon-minus"></span>
+            </button>
+          </span>
+          <button class='btn btn-default btn-lg pull-right' id='flame-on' >
+            <span class="glyphicon glyphicon-fire" aria-hidden="true"></span>
+          </button>
+          <div><span class='f'></span> °F</div>
+          <small><span class='c'></span> °C</small>
+        </h1>
+      </div>
+      <div class='panel clearfix'>
+        <h1 id='jets'>
+          <span class='pull-left btn-group-vertical'>
+            <button class='btn btn-default' id='plus-jets'>
+              <span class="glyphicon glyphicon-plus"></span>
+            </button>
+            <button class='btn btn-default' id='minus-jets'>
+              <span class="glyphicon glyphicon-minus"></span>
+            </button>
+          </span>
+          <button id='jets-on' class='pull-right btn btn-lg btn-default' >
+            <span class="glyphicon glyphicon-tint" aria-hidden="true"></span>
+          </button>
+          <div><span id='time'>0</span> min</div>
+          <small><span id='ms'></span> ms</small>
+        </h1>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
 
 <script>
-  setInterval(function() {
-      $.ajax('http://192.168.1.75/sensors.json').then(function(response) {
-        $('#temp').text(response.temperature.fahrenheight);
-        $('#set').text(response.set_temp.fahrenheight);
-      });
+  function updateTemp(temperature) {
+      $('#temp .f').text(temperature.fahrenheit);
+      $('#temp .c').text(temperature.celsius);
+  }
 
-  }, 1000);
+  function updateSet(deg_f) {
+      var deg_c = Math.round(((deg_f - 32)*5.0/9.0)*100)/100;
+      $('#set .f').text(deg_f);
+      $('#set .c').text(deg_c);
+      updateHeat(getTemp() <= getSetTemp());
+  }
+
+  function getTemp() {
+      return parseFloat($('#temp .f').text());
+  }
+
+  function getSetTemp() {
+      return parseFloat($('#set .f').text());
+  }
+
+  function incrementSet(increment) {
+    var increment = increment || 1;
+    updateSet(getSetTemp() + increment);
+  }
+  function incrementJets(increment) {
+    var increment = increment || 1;
+    updateJets((getJetsMinutes() + increment) * 60000);
+  }
+
+  function updateHeat(heat) {
+    $('#flame-on, #heat').toggleClass('on', heat);
+  }
+
+  function getJetsMillis() {
+    return parseInt($('#ms').text());
+  }
+  function getJetsMinutes() {
+    return parseInt($('#time').text());
+  }
+
+  function updateJets(ms) {
+    $('#ms').text(ms);
+    $('#time').text((ms / 60000).toFixed());
+    $('#jets-on').toggleClass('on', ms > 0);
+  }
+
+  function update() {
+      $.ajax('http://192.168.1.75/sensors.json').then(function(response) {
+        updateTemp(response.temperature);
+
+        var deg_f = getSetTemp();
+        if(response.set_temp.fahrenheit != deg_f) {
+          $.ajax('http://192.168.1.75/sf/' + deg_f);
+        } else {
+          updateHeat(response.heater_pump);
+        }
+
+        var ms = getJetsMillis();
+        var minutes = getJetsMinutes();
+        if(ms === 0 && response.jets > 0) {
+          $.ajax('http://192.168.1.75/j/off');
+        }
+        else if(Math.abs(response.jets - ms) >= 60000) {
+          $.ajax('http://192.168.1.75/j/on/' + minutes );
+        } else {
+          updateJets(response.jets);
+        }
+
+        setTimeout(update, 3000);
+      }).fail(function(request) {
+        $('#error').text(request.statusText).show();
+      });
+  };
+
+  $.ajax('http://192.168.1.75/sensors.json').then(function(response) {
+    $('#set .f').text(response.set_temp.fahrenheit);
+    $('#set .c').text(response.set_temp.celsius);
+    updateTemp(response.temperature);
+    updateHeat(response.heater_pump);
+    updateJets(response.jets);
+    $('#hottub').removeClass('hide');
+    $('#error').text('');
+    update();
+
+    $('#plus-set').click(function(e) {
+        incrementSet(1);
+    });
+    $('#minus-set').click(function(e) {
+        incrementSet(-1);
+    });
+    $('#plus-jets').click(function(e) {
+        incrementJets(1);
+    });
+    $('#minus-jets').click(function(e) {
+        incrementJets(-1);
+    });
+    $('#jets-on').click(function(e) {
+        if (getJetsMillis() > 0) {
+          updateJets(0);
+        } else {
+          updateJets(15 * 60000);
+        }
+    });
+    $('#flame-on').click(function(e) {
+        if (getSetTemp() === 104) {
+          updateSet(32);
+        } else {
+          updateSet(104);
+        }
+    });
+  }).fail(function(request) {
+    $('#error').text(request.statusText).show();
+  });
+
+
 </script>

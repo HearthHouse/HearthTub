@@ -68,10 +68,6 @@ a:visited { color: #a0a; }
 }
 
 
-.title a {
-  color: #a00;
-}
-
 .title a:hover {
   color: #000;
 }
@@ -153,3 +149,55 @@ a:visited { color: #a0a; }
 .post pre.terminal code {
   background-color: #333;
 }
+
+.buttons {
+  margin-bottom: 2em;
+}
+.buttons .indicator {
+  border-radius: 50%;
+  height: 20px;
+  width: 20px;
+  padding: 0.5em;
+  background-color: white;
+  border: 1px solid gray;
+  display: inline-block;
+  vertical-align: middle;
+  -webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
+  opacity: 0.8;
+  border: 0px solid transparent;
+  background-color: #ddd;
+  margin-right: 0.5em;
+}
+.buttons .active .indicator {
+  background-color: #3a94a5;
+  background-image: -webkit-linear-gradient(top, #149bdf 0%, #0480be 100%);
+  background-image: linear-gradient(to bottom, #149bdf 0%, #0480be 100%);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff149bdf', endColorstr='#ff0480be', GradientType=0);
+  filter: none;
+}
+.slider-selection {
+    background: #BABABA;
+}
+.panel {
+  text-align: center;
+  padding-bottom: 20px;
+}
+.slider {
+  max-width: 100%;
+}
+#controls > * {
+  text-align: center;
+}
+#controls .btn-lg {
+  font-size: 1em;
+}
+.on .glyphicon-fire { color: #a00; }
+.on .glyphicon-tint { color: #149bdf; }
+
+#title {
+  font-weight: bold;
+}
+h1 .red { color: #a00; }
+h1 .blue { color: #00a; }
