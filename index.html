@@ -3,11 +3,17 @@ layout: default
 title: Your New Jekyll Site
 ---
 
-<div id="home">
-  <h1>Blog Posts</h1>
-  <ul class="posts">
-    {% for post in site.posts %}
-      <li><span>{{ post.date | date_to_string }}</span> &raquo; <a href="{{ post.url }}">{{ post.title }}</a></li>
-    {% endfor %}
-  </ul>
-</div>
+  <dl class='dl-horizontal'>
+    <dt>Temperature<dt><dd id='temp'>??</dd>
+    <dt>Set point<dt><dd id='set'>??</dd>
+  </dl>
+
+<script>
+  setInterval(function() {
+      $.ajax('http://192.168.1.75/sensors.json').then(function(response) {
+        $('#temp').text(response.temperature.fahrenheight);
+        $('#set').text(response.set_temp.fahrenheight);
+      });
+
+  }, 1000);
+</script>
