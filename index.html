@@ -97,7 +97,7 @@ title: HearthTub
   }
 
   function updateHeat(heat) {
-    $('#flame-on, #heat').toggleClass('on', heat);
+    $('#flame-on').toggleClass('on', heat);
   }
 
   function getJetsMillis() {
@@ -116,6 +116,7 @@ title: HearthTub
   function update() {
       $.ajax('http://192.168.1.75/sensors.json').then(function(response) {
         updateTemp(response.temperature);
+        $('#title').toggleClass('on', response.heater_pump);
 
         var deg_f = getSetTemp();
         if(response.set_temp.fahrenheit != deg_f) {

@@ -196,8 +196,12 @@ a:visited { color: #a0a; }
 .on .glyphicon-fire { color: #a00; }
 .on .glyphicon-tint { color: #149bdf; }
 
+h1 .red { color: #a00; }
+h1 .blue { color: #00a; }
+
 #title {
   font-weight: bold;
 }
-h1 .red { color: #a00; }
-h1 .blue { color: #00a; }
+#title.on {
+  color: #a00;
+}
